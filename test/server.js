@@ -25,13 +25,8 @@ client.set("user3",
 app.use(express.json())
 
 app.get('/users', authenticateToken, (req, res) => {
-    // res.json(users.filter(post => post.username === req.user.name))
-    // res.json({name: res.user.name, Auth: true})
-    // res.json({msg: req.user})
     res.end(`${req.user} auth \n`)
 })
-
-
 
 app.post('/login', (req, res) => {
 
@@ -39,7 +34,9 @@ app.post('/login', (req, res) => {
 
     const username = req.body.username
     const password = req.body.password
-    // const user = { name: username }
+
+    if (!username || !password)
+        res.end("try again\n")
 
     client.get(username, (err, replay) => {
 
@@ -53,32 +50,20 @@ app.post('/login', (req, res) => {
         } else
             res.end("try again\n")
     })
-
-
-    // const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET)
-
-
-    // let accessToken = username + "." + password + "." + process.env.ACCESS_TOKEN_SECRET
-    // accessToken = Buffer.from(accessToken).toString('base64')
-
-    // client.set(req.body.username, accessToken, redis.print)
-
-    // res.json({ accessToken: accessToken })
 })
 
 function authenticateToken(req, res, next) {
     const authHeader = req.headers['authorization']
-    console.log("AH -> " + authHeader)
     const token = authHeader && authHeader.split(' ')[1]
-    if (token == null) return res.sendStatus(401)
 
-    console.log("token -> " + token)
+    if (token == null)  return res.end("Unauthorized\n")
 
     let user = parseToken(token)
 
-    console.log("user -> " + user)
-
     client.get(user.username, (err, replay) => {
+
+        if(err) console.log(err)
+
         if (replay === token) {
             req.user = user.username
             next()
@@ -86,16 +71,6 @@ function authenticateToken(req, res, next) {
             res.json({ msg: "invalid token" })
 
     })
-
-    // let user = Buffer.from(token, 'base64').toString('ascii')
-
-
-    // jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
-    // console.log(user)
-    // if (err) return res.sendStatus(403)
-    // req.user = user
-
-    // })
 }
 
 function parseToken(token) {
@@ -113,7 +88,7 @@ app.listen(3001, () => {
 // curl -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiS3lsZSIsImlhdCI6MTYwMTY0MDc3M30._OjSaGRd8DkLvA3HYyoI_OA4cu4MIfiXx3Kb5-NbraE" http://localhost:3000/users
 // curl -d "username=Kyle" http://localhost:3000/login
 // curl -X POST -H "Content-Type: application/json" -d "{\"username\":\"chelovek\", \"password\":\"123\"}" http://localhost:3001/login
-// curl -X POST -H "Content-Type: application/json" -d '{"username":"chelovek","password":"123"}' http://localhost:3001/login
+// curl -X POST -H "Content-Type: application/json" -d '{"username":"user1","password":"123"}' http://localhost:3001/login
 // curl -H "Authorization: Bearer Y2hlbG92ZWsxMjNiYWI=" http://localhost:3001/users
 // curl -X POST http://localhost:3001/users
 // user1 --token-- curl -H "Authorization: Bearer dXNlcjEuMTIzLmJhYg==" http://localhost:3001/users
