@@ -132,91 +132,18 @@ app.post('/upload', async (req, res) => {
   let file = await fs.createWriteStream(`./uploads/${count}`)
   count++
 
-  // console.log(writeStream)
+
 
   req.pipe(file)
 
-
-  // file.end()
-  // file.close()
 
   res.send("Файл загружен")
 })
 
 
-
-function getByteArray(filePath){
-  let f = fs.readFileSync("./uploads/23.png", "binary")
-  let result = []
-  for (let i = 0; i < f.length; i++) {
-
-    // 0D 0A 0D 0A
-    // if(i < f.length - 8 &&
-    //     f[i] === '0' &&
-    //     f[i+1] === 'D' &&
-    //     f[i+2] === '0' &&
-    //     f[i+3] === 'A' &&
-    //     f[i+4] === '0' &&
-    //     f[i+5] === 'D' &&
-    //     f[i+6] === '0' &&
-    //     f[i+7] === 'A') {
-      result.push(f[i])
-    // }
-  }
-
-
-  return result
-}
-
-// result = getByteArray('./uploads/23.png')
-// console.log(result[0])
-
-
 let f = fs.readFileSync("./uploads/20")
 
-// function hexToString (hex) {
-//
-//   let string = ''
-//   for (let i = 0; i < hex.length; i += 2) {
-//     string += String.fromCharCode(parseInt(hex.substr(i, 2), 16))
-//   }
-//   return string
-// }
-
-
-// for (let i = 0; i < f.length; i++) {
-//   // 0D 0A 0D 0A
-//   if (i < f.length - 8 &&
-//       f[i] === '0' &&
-//       f[i + 1] === 'd' &&
-//       f[i + 2] === '0' &&
-//       f[i + 3] === 'a' &&
-//       f[i + 4] === '0' &&
-//       f[i + 5] === 'd' &&
-//       f[i + 6] === '0' &&
-//       f[i + 7] === 'a') {
-//     // f = f.slice(i + 8)
-//     f = f.substring(i+8)
-//     break
-//   }
-// }
-//
-// for (let i = f.length; i > 0; i--) {
-//   // 0D 0A 2D 2D
-//   if (i > 7 &&
-//       f[i] === 'd' &&
-//       f[i - 1] === '2' &&
-//       f[i - 2] === 'd' &&
-//       f[i - 3] === '2' &&
-//       f[i - 4] === 'a' &&
-//       f[i - 5] === '0' &&
-//       f[i - 6] === 'd' &&
-//       f[i - 7] === '0') {
-//     // f = f.slice(0, i - 7)
-//     f = f.substring(0, i - 7)
-//     break
-//   }
-// }
+let filename = ''
 
 for (let i = 0; i < f.length; i++) {
   // 013 010 013 010
@@ -225,6 +152,11 @@ for (let i = 0; i < f.length; i++) {
       f[i + 1] === 10 &&
       f[i + 2] === 13 &&
       f[i + 3] === 10 ) {
+    let val = f.slice(0, i + 4).toString()
+    let reg = /filename="[^"]*"/
+    let arr = reg.exec(val)
+    filename = arr[0].slice(10).slice(0, -1)
+
     f = f.slice(i + 4)
     break
   }
@@ -243,7 +175,7 @@ for (let i = f.length; i > 0; i--) {
 }
 
 
-fs.writeFile("./datadata.png", f, err => {
+fs.writeFile(`./${filename}`, f, err => {
   console.log(err)
 })
 
