@@ -28,7 +28,7 @@ app.get('/users', authenticateToken, (req, res) => {
     // res.json(users.filter(post => post.username === req.user.name))
     // res.json({name: res.user.name, Auth: true})
     // res.json({msg: req.user})
-    res.end(`username: `)
+    res.end(`${req.user} auth \n`)
 })
 
 
@@ -42,35 +42,50 @@ app.post('/login', (req, res) => {
     // const user = { name: username }
 
     client.get(username, (err, replay) => {
-        let user = Buffer.from(replay, 'base64').toString('ascii')
-        if (user.split('.')[1] === password) {
+
+        if(err) console.log(err)
+
+        let user = parseToken(replay)
+        console.log(user)
+        if (user.password === password) {
             console.log("password success")
-        }
-
-
+            res.json({ accessToken: replay })
+        } else
+            res.end("try again\n")
     })
 
 
     // const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET)
 
 
-    let accessToken = username + "." + password + "." + process.env.ACCESS_TOKEN_SECRET
-    accessToken = Buffer.from(accessToken).toString('base64')
+    // let accessToken = username + "." + password + "." + process.env.ACCESS_TOKEN_SECRET
+    // accessToken = Buffer.from(accessToken).toString('base64')
 
     // client.set(req.body.username, accessToken, redis.print)
 
-    res.json({ accessToken: accessToken })
+    // res.json({ accessToken: accessToken })
 })
 
 function authenticateToken(req, res, next) {
-    // const authHeader = req.headers['authorization']
-    // console.log("AH -> " + authHeader)
-    // const token = authHeader && authHeader.split(' ')[1]
-    // if (token == null) return res.sendStatus(401)
+    const authHeader = req.headers['authorization']
+    console.log("AH -> " + authHeader)
+    const token = authHeader && authHeader.split(' ')[1]
+    if (token == null) return res.sendStatus(401)
 
-    // console.log(token)
+    console.log("token -> " + token)
 
-    client.get("token", redis.print)
+    let user = parseToken(token)
+
+    console.log("user -> " + user)
+
+    client.get(user.username, (err, replay) => {
+        if (replay === token) {
+            req.user = user.username
+            next()
+        } else
+            res.json({ msg: "invalid token" })
+
+    })
 
     // let user = Buffer.from(token, 'base64').toString('ascii')
 
@@ -79,13 +94,16 @@ function authenticateToken(req, res, next) {
     // console.log(user)
     // if (err) return res.sendStatus(403)
     // req.user = user
-    next()
+
     // })
 }
 
 function parseToken(token) {
-    token = Buffer.from(token, 'base64').toString('ascii')
-    return {}
+    let data = Buffer.from(token, 'base64').toString('ascii')
+    return {
+        username: data.split('.')[0],
+        password: data.split('.')[1]
+    }
 }
 
 app.listen(3001, () => {
@@ -98,3 +116,4 @@ app.listen(3001, () => {
 // curl -X POST -H "Content-Type: application/json" -d '{"username":"chelovek","password":"123"}' http://localhost:3001/login
 // curl -H "Authorization: Bearer Y2hlbG92ZWsxMjNiYWI=" http://localhost:3001/users
 // curl -X POST http://localhost:3001/users
+// user1 --token-- curl -H "Authorization: Bearer dXNlcjEuMTIzLmJhYg==" http://localhost:3001/users
