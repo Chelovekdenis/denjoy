@@ -4,6 +4,10 @@ const parseToken = require('../services/parser')
 const client = require('../services/rediser')
 
 
+// Получает токен из Редис по имени, парсет его и
+// сверяет пароли, если все хорошо дальше отправляет
+// пользователя с токеном
+
 router.post('/', (req, res) => {
     const username = req.body.username
     const password = req.body.password

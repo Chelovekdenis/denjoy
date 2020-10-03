@@ -3,10 +3,9 @@ const express = require('express')
 const router = express.Router()
 
 
+// Сервер находит в папке файл и отдает его по параметру строки запроса
+
 router.get('/', (req, res) => {
-
-    // http://localhost:3000/download?filename=Screenshot from 2020-10-03 01-30-56.png
-
     let fileName = req.query.filename
 
     if ((fileName.indexOf('/') || fileName.indexOf('\\')) > -1 )
@@ -17,7 +16,7 @@ router.get('/', (req, res) => {
         // если произошла ошибка - отправляем статусный код 404
         if(err){
             res.statusCode = 404;
-            res.end("Resourse not found!");
+            res.end("Resource not found!");
         } else
             fs.createReadStream(filePath).pipe(res)
     })
