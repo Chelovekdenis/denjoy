@@ -1,46 +1,31 @@
 const express = require('express')
 const router = express.Router()
-
-const users = [{username: 'test', password: 'test'}, {username: 'user', password: '12345'}]
-let auth = false
-
-// router.use((req, res, next) => {
-//     console.log("Middle")
-//     req.body.count = 113
-//     next()
-// })
-
-router.get('/', (req, res) => {
-    console.log(req.body.count)
-
-    if (auth) {
-        res.end("GET !!!!!!!")
-    } else {
-        res.end("GET")
-    }
-})
+const client = require('../services/rediser')
+const { parseToken } = require('../services/parser')
 
 
 router.post('/', (req, res) => {
-    console.log(req.body.username, req.body.password)
 
+    // TODO validation
 
-    const user = users.find(u => u.username === req.body.username && u.password === req.body.password)
+    const username = req.body.username
+    const password = req.body.password
 
-    console.log(user)
+    if (!username || !password)
+        res.end("try again\n")
 
-    if (req.body.username === "user" && req.body.password === "12345") {
-        auth = true
-        console.log("Log in")
-        res.send('true')
-    } else {
-        console.log("Nooooo")
-        res.send('false')
-    }
+    client.get(username, (err, replay) => {
 
+        if(err) console.log(err)
 
+        let user = parseToken(replay)
+        console.log(user)
+        if (user.password === password) {
+            console.log("password success")
+            res.json({ accessToken: replay })
+        } else
+            res.end("try again\n")
+    })
 })
 
 module.exports = router
-
-// curl -d "username=user&password=12345" http://localhost:3000/login
