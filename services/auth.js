@@ -1,5 +1,5 @@
-const client = require('rediser')
-const parseToken = require('parser')
+const client = require('./rediser')
+const parseToken = require('./parser')
 
 function authenticateToken(req, res, next) {
     const authHeader = req.headers['authorization']
@@ -21,6 +21,5 @@ function authenticateToken(req, res, next) {
 
     })
 }
-
 
 module.exports = authenticateToken

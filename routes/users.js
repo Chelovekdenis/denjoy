@@ -1,7 +1,6 @@
-const fs = require('fs')
 const express = require('express')
 const router = express.Router()
-const { authenticateToken } = require('../services/auth')
+const authenticateToken  = require('../services/auth')
 
 
 router.get('/', authenticateToken, (req, res) => {

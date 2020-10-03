@@ -8,22 +8,17 @@ router.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '../public', 'form_data.html'))
 })
 
+
 let count = 30
 
-
 router.post('/', async (req, res) => {
-
-    // TODO проверка на / и \
-
     const filePath = `./uploads/${count}`
 
     let file =  fs.createWriteStream(filePath)
-
     req.pipe(file)
 
     file.on('finish', err => {
         let f = fs.readFileSync(filePath)
-
         let filename = ''
 
         for (let i = 0; i < f.length; i++) {
@@ -36,6 +31,7 @@ router.post('/', async (req, res) => {
                 let val = f.slice(0, i + 4).toString()
                 let reg = /filename="[^"]*"/
                 let arr = reg.exec(val)
+
                 filename = arr[0].slice(10).slice(0, -1)
 
                 f = f.slice(i + 4)
