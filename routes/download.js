@@ -5,7 +5,7 @@ const router = express.Router()
 
 router.get('/', (req, res) => {
 
-    // http://localhost:3000/download?filename=oc6TRb.jpg
+    // http://localhost:3000/download?filename=heinrich-boehmer-6036672.jpg
 
     let fileName = req.query.filename
 
